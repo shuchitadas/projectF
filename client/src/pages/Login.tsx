@@ -16,8 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Form validation schema
 const loginSchema = z.object({
@@ -34,6 +34,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { signInWithEmail, signInWithGoogle, signInWithFacebook } = useAuth();
 
   // Initialize form
   const form = useForm<LoginFormValues>({
@@ -49,22 +50,20 @@ export default function Login() {
   async function onSubmit(values: LoginFormValues) {
     try {
       setIsLoading(true);
-      const response = await apiRequest("POST", "/api/auth/login", {
-        email: values.email,
-        password: values.password,
-      });
-
-      const user = await response.json();
+      
+      await signInWithEmail(values.email, values.password);
 
       // Show success toast
       toast({
         title: "Login successful",
-        description: `Welcome back, ${user.firstName}!`,
+        description: "Welcome back!",
       });
 
       // Redirect to browse mentors page
       setLocation("/browse-mentors");
     } catch (error) {
+      console.error("Login error:", error);
+      
       // Show error toast
       toast({
         title: "Login failed",
@@ -75,6 +74,40 @@ export default function Login() {
       setIsLoading(false);
     }
   }
+
+  // Handle Google Sign In
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithGoogle();
+      // Note: The redirect will happen, and the success message will be shown by FirebaseAuth component
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      toast({
+        title: "Sign in failed",
+        description: "Could not sign in with Google. Please try again.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
+  };
+
+  // Handle Facebook Sign In
+  const handleFacebookSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithFacebook();
+      // Note: The redirect will happen, and the success message will be shown by FirebaseAuth component
+    } catch (error) {
+      console.error("Facebook sign-in error:", error);
+      toast({
+        title: "Sign in failed",
+        description: "Could not sign in with Facebook. Please try again.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -198,7 +231,12 @@ export default function Login() {
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-3">
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                >
                   <svg
                     className="w-5 h-5 mr-2"
                     viewBox="0 0 24 24"
@@ -224,7 +262,12 @@ export default function Login() {
                   </svg>
                   Google
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleFacebookSignIn}
+                  disabled={isLoading}
+                >
                   <svg
                     className="w-5 h-5 mr-2"
                     fill="#1877F2"

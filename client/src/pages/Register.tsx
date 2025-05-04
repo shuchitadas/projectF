@@ -19,6 +19,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { updateProfile } from "firebase/auth";
 
 // Form validation schema
 const registerSchema = z
@@ -57,6 +59,7 @@ export default function Register() {
   const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { signUpWithEmail, signInWithGoogle, signInWithFacebook } = useAuth();
 
   // Initialize form
   const form = useForm<RegisterFormValues>({
@@ -78,16 +81,25 @@ export default function Register() {
       setIsLoading(true);
       const { confirmPassword, acceptTerms, ...userData } = values;
       
+      // Register with Firebase
+      const userCredential = await signUpWithEmail(values.email, values.password);
+      
+      // Update user profile with first name and last name
+      await updateProfile(userCredential.user, {
+        displayName: `${values.firstName} ${values.lastName}`
+      });
+      
+      // Additionally store user data in our backend
       await apiRequest("POST", "/api/auth/register", userData);
 
       // Show success toast
       toast({
         title: "Registration successful",
-        description: "Your account has been created. You can now log in.",
+        description: "Your account has been created. You are now logged in.",
       });
 
-      // Redirect to login page
-      setLocation("/login");
+      // Redirect to browse mentors page
+      setLocation("/browse-mentors");
     } catch (error) {
       console.error("Registration error:", error);
       
@@ -101,6 +113,40 @@ export default function Register() {
       setIsLoading(false);
     }
   }
+  
+  // Handle Google Sign In
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithGoogle();
+      // Note: The redirect will happen, and the success message will be shown by FirebaseAuth component
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      toast({
+        title: "Sign in failed",
+        description: "Could not sign in with Google. Please try again.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
+  };
+
+  // Handle Facebook Sign In
+  const handleFacebookSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithFacebook();
+      // Note: The redirect will happen, and the success message will be shown by FirebaseAuth component
+    } catch (error) {
+      console.error("Facebook sign-in error:", error);
+      toast({
+        title: "Sign in failed",
+        description: "Could not sign in with Facebook. Please try again.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -300,7 +346,12 @@ export default function Register() {
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-3">
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                >
                   <svg
                     className="w-5 h-5 mr-2"
                     viewBox="0 0 24 24"
@@ -326,7 +377,12 @@ export default function Register() {
                   </svg>
                   Google
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleFacebookSignIn}
+                  disabled={isLoading}
+                >
                   <svg
                     className="w-5 h-5 mr-2"
                     fill="#1877F2"
