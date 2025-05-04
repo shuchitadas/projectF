@@ -46,23 +46,23 @@ export function Navbar() {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/">
-                <a className="text-2xl font-bold text-primary">
+                <span className="text-2xl font-bold text-primary cursor-pointer">
                   MentorMatch
-                </a>
+                </span>
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navigation.map((item) => (
                 <Link key={item.name} href={item.href}>
-                  <a
+                  <span
                     className={`${
                       isActive(item.href)
                         ? "border-primary text-gray-900"
                         : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                    } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                    } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-pointer`}
                   >
                     {item.name}
-                  </a>
+                  </span>
                 </Link>
               ))}
             </div>
@@ -114,9 +114,9 @@ export function Navbar() {
             ) : (
               <>
                 <Link href="/login">
-                  <a className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+                  <span className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium cursor-pointer">
                     Log in
-                  </a>
+                  </span>
                 </Link>
                 <Link href="/register">
                   <Button size="sm" className="ml-3">
@@ -142,31 +142,63 @@ export function Navbar() {
                 <nav className="flex flex-col mt-6 space-y-6">
                   {navigation.map((item) => (
                     <Link key={item.name} href={item.href}>
-                      <a
-                        className="text-base font-medium text-gray-900 hover:text-primary"
+                      <span
+                        className="text-base font-medium text-gray-900 hover:text-primary cursor-pointer"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {item.name}
-                      </a>
+                      </span>
                     </Link>
                   ))}
                   <div className="pt-6 border-t border-gray-200">
-                    <Link href="/login">
-                      <a
-                        className="text-base font-medium text-gray-900 hover:text-primary"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Log in
-                      </a>
-                    </Link>
-                    <Link href="/register">
-                      <a
-                        className="mt-4 block w-full px-4 py-2 text-center text-base font-medium text-white bg-primary rounded-md shadow-sm hover:bg-primary/90"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Sign up
-                      </a>
-                    </Link>
+                    {currentUser ? (
+                      <>
+                        <div className="flex items-center mb-4">
+                          <Avatar className="h-10 w-10 mr-3">
+                            <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || "User"} />
+                            <AvatarFallback>
+                              {currentUser.displayName
+                                ? `${currentUser.displayName.charAt(0)}`
+                                : currentUser.email
+                                ? `${currentUser.email.charAt(0).toUpperCase()}`
+                                : "U"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{currentUser.displayName || "User"}</p>
+                            <p className="text-xs text-gray-500">{currentUser.email}</p>
+                          </div>
+                        </div>
+                        <span
+                          className="block text-base font-medium text-gray-900 hover:text-primary cursor-pointer"
+                          onClick={() => {
+                            handleSignOut();
+                            setIsMenuOpen(false);
+                          }}
+                        >
+                          Log out
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/login">
+                          <span
+                            className="text-base font-medium text-gray-900 hover:text-primary cursor-pointer"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            Log in
+                          </span>
+                        </Link>
+                        <Link href="/register">
+                          <span
+                            className="mt-4 block w-full px-4 py-2 text-center text-base font-medium text-white bg-primary rounded-md shadow-sm hover:bg-primary/90 cursor-pointer"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            Sign up
+                          </span>
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </nav>
               </SheetContent>
