@@ -47,7 +47,7 @@ export function Navbar() {
             <div className="flex-shrink-0 flex items-center">
               <Link href="/">
                 <span className="text-2xl font-bold text-primary cursor-pointer">
-                  MentorMatch
+                  Mentoring
                 </span>
               </Link>
             </div>

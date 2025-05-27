@@ -7,7 +7,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
-            <div className="text-white text-2xl font-bold mb-4">MentorMatch</div>
+            <div className="text-white text-2xl font-bold mb-4">Mentoring</div>
             <p className="text-gray-300 mb-4 max-w-md">
               Connecting ambitious professionals with experienced mentors to accelerate careers and foster growth in the tech industry.
             </p>
